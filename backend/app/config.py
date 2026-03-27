@@ -10,11 +10,13 @@ class Settings(BaseSettings):
         DATABASE_URL: Connection string for the database.
         APP_ENV: Application environment (development, production, testing).
         DEBUG: Enable debug mode.
+        ALLOWED_ORIGINS: List of allowed CORS origins.
     """
 
-    DATABASE_URL: str = "mssql+aioodbc:///?odbc_connect=Driver%3D%7BODBC+Driver+17+for+SQL+Server%7D%3BServer%3DDESKTOP-QBCI725%5CSQLEXPRESS%3BDatabase%3DTodoDb%3BTrusted_Connection%3Dyes%3BTrustServerCertificate%3Dyes%3BEncrypt%3Dyes"
+    DATABASE_URL: str = "mssql+aioodbc:///?odbc_connect=DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost\\SQLEXPRESS;DATABASE=TodoDb;Trusted_Connection=yes;"
     APP_ENV: str = "development"
     DEBUG: bool = True
+    ALLOWED_ORIGINS: list[str] = ["http://localhost:5173"]
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

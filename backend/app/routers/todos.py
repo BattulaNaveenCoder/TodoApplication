@@ -1,12 +1,12 @@
 """API routes for Todo resource."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.exceptions import TodoNotFoundError
 from app.repositories.todo_repository import TodoRepository
-from app.schemas.todo import TodoCreate, TodoResponse, TodoUpdate
+from app.schemas.todo import TodoCreate, TodoListResponse, TodoResponse, TodoUpdate
 from app.services.todo_service import TodoService
 
 router = APIRouter(prefix="/api/v1/todos", tags=["todos"])
@@ -19,20 +19,21 @@ def get_todo_service() -> TodoService:
 
 @router.get(
     "",
-    response_model=list[TodoResponse],
+    response_model=TodoListResponse,
     status_code=status.HTTP_200_OK,
 )
 async def list_todos(
     session: AsyncSession = Depends(get_db),
     service: TodoService = Depends(get_todo_service),
-) -> list[TodoResponse]:
+) -> TodoListResponse:
     """List all todo items ordered by creation date descending.
 
     Returns:
-        A list of all todos.
+        A TodoListResponse containing all todos and count.
     """
     todos = await service.list_todos(session)
-    return [TodoResponse.model_validate(t) for t in todos]
+    items = [TodoResponse.model_validate(t) for t in todos]
+    return TodoListResponse(todos=items, count=len(items))
 
 
 @router.post(
@@ -76,18 +77,13 @@ async def get_todo(
         The requested todo.
 
     Raises:
-        HTTPException: 404 if todo not found.
+        TodoNotFoundError: 404 if todo not found.
     """
-    try:
-        todo = await service.get_todo(session, todo_id)
-    except TodoNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=e.message
-        ) from e
+    todo = await service.get_todo(session, todo_id)
     return TodoResponse.model_validate(todo)
 
 
-@router.put(
+@router.patch(
     "/{todo_id}",
     response_model=TodoResponse,
     status_code=status.HTTP_200_OK,
@@ -108,14 +104,9 @@ async def update_todo(
         The updated todo.
 
     Raises:
-        HTTPException: 404 if todo not found.
+        TodoNotFoundError: 404 if todo not found.
     """
-    try:
-        todo = await service.update_todo(session, todo_id, data)
-    except TodoNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=e.message
-        ) from e
+    todo = await service.update_todo(session, todo_id, data)
     return TodoResponse.model_validate(todo)
 
 
@@ -127,21 +118,17 @@ async def delete_todo(
     todo_id: int,
     session: AsyncSession = Depends(get_db),
     service: TodoService = Depends(get_todo_service),
-) -> None:
+) -> Response:
     """Delete a todo item.
 
     Args:
         todo_id: The ID of the todo to delete.
 
     Raises:
-        HTTPException: 404 if todo not found.
+        TodoNotFoundError: 404 if todo not found.
     """
-    try:
-        await service.delete_todo(session, todo_id)
-    except TodoNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=e.message
-        ) from e
+    await service.delete_todo(session, todo_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.patch(
@@ -163,14 +150,9 @@ async def complete_todo(
         The updated todo.
 
     Raises:
-        HTTPException: 404 if todo not found.
+        TodoNotFoundError: 404 if todo not found.
     """
-    try:
-        todo = await service.complete_todo(session, todo_id)
-    except TodoNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=e.message
-        ) from e
+    todo = await service.complete_todo(session, todo_id)
     return TodoResponse.model_validate(todo)
 
 
@@ -193,12 +175,7 @@ async def uncomplete_todo(
         The updated todo.
 
     Raises:
-        HTTPException: 404 if todo not found.
+        TodoNotFoundError: 404 if todo not found.
     """
-    try:
-        todo = await service.uncomplete_todo(session, todo_id)
-    except TodoNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=e.message
-        ) from e
+    todo = await service.uncomplete_todo(session, todo_id)
     return TodoResponse.model_validate(todo)

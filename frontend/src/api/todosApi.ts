@@ -1,12 +1,8 @@
-import axios from 'axios';
-import type { Todo, TodoCreate, TodoUpdate } from '../types/todo';
+import api from './axiosInstance';
+import type { Todo, TodoCreate, TodoListResponse, TodoUpdate } from '../types/todo';
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
-});
-
-export async function fetchTodos(): Promise<Todo[]> {
-  const response = await api.get<Todo[]>('/todos');
+export async function fetchTodos(): Promise<TodoListResponse> {
+  const response = await api.get<TodoListResponse>('/todos');
   return response.data;
 }
 
@@ -21,7 +17,7 @@ export async function createTodo(data: TodoCreate): Promise<Todo> {
 }
 
 export async function updateTodo(id: number, data: TodoUpdate): Promise<Todo> {
-  const response = await api.put<Todo>(`/todos/${id}`, data);
+  const response = await api.patch<Todo>(`/todos/${id}`, data);
   return response.data;
 }
 

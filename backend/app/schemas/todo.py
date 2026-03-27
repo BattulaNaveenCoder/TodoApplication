@@ -55,3 +55,10 @@ class TodoResponse(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TodoListResponse(BaseModel):
+    """Schema wrapping a list of todos with a count."""
+
+    todos: list[TodoResponse]
+    count: int

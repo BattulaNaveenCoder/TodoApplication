@@ -1,66 +1,58 @@
 """Shared test fixtures for the Todo application tests."""
 
+from collections.abc import AsyncGenerator
+
 import pytest
+import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.database import Base, get_db
 from app.main import app
-from app.models.todo import Todo
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
+engine_test = create_async_engine(TEST_DATABASE_URL, echo=False)
 
-@pytest.fixture()
-async def engine():
-    """Create an async test engine with in-memory SQLite."""
-    test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
-    async with test_engine.begin() as conn:
+AsyncSessionTest = async_sessionmaker(
+    bind=engine_test,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def setup_database() -> AsyncGenerator[None, None]:
+    """Create all tables before each test and drop them after."""
+    async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    yield test_engine
-    async with test_engine.begin() as conn:
+    yield
+    async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-    await test_engine.dispose()
 
 
-@pytest.fixture()
-async def session(engine):
-    """Yield an async session for each test, rolled back after use."""
-    async_session = async_sessionmaker(
-        bind=engine, class_=AsyncSession, expire_on_commit=False
-    )
-    async with async_session() as sess:
-        yield sess
+@pytest_asyncio.fixture
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
+    """Provide a clean async database session for each test."""
+    async with AsyncSessionTest() as session:
+        yield session
 
 
-@pytest.fixture()
-async def client(engine):
-    """Yield an httpx AsyncClient wired to the test database."""
-    async_session = async_sessionmaker(
-        bind=engine, class_=AsyncSession, expire_on_commit=False
-    )
+@pytest_asyncio.fixture
+async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
+    """Provide an httpx AsyncClient wired to the test database."""
 
-    async def override_get_db():
-        async with async_session() as sess:
-            try:
-                yield sess
-                await sess.commit()
-            except Exception:
-                await sess.rollback()
-                raise
+    async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
+        """Override the get_db dependency to use the test session."""
+        try:
+            yield db_session
+            await db_session.commit()
+        except Exception:
+            await db_session.rollback()
+            raise
 
     app.dependency_overrides[get_db] = override_get_db
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
     app.dependency_overrides.clear()
-
-
-@pytest.fixture()
-async def sample_todo(session) -> Todo:
-    """Create and return a sample todo for testing."""
-    todo = Todo(title="Test Todo", description="Test description")
-    session.add(todo)
-    await session.commit()
-    await session.refresh(todo)
-    return todo

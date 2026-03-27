@@ -6,12 +6,12 @@ class AppException(Exception):
 
     Attributes:
         message: Human-readable error description.
-        code: Machine-readable error code.
+        status_code: HTTP status code to return.
     """
 
-    def __init__(self, message: str, code: str = "APP_ERROR") -> None:
+    def __init__(self, message: str, status_code: int = 500) -> None:
         self.message = message
-        self.code = code
+        self.status_code = status_code
         super().__init__(self.message)
 
 
@@ -21,7 +21,7 @@ class TodoNotFoundError(AppException):
     def __init__(self, todo_id: int) -> None:
         super().__init__(
             message=f"Todo with id {todo_id} not found",
-            code="TODO_NOT_FOUND",
+            status_code=404,
         )
 
 
@@ -29,4 +29,4 @@ class ValidationError(AppException):
     """Raised when input data fails business validation."""
 
     def __init__(self, message: str) -> None:
-        super().__init__(message=message, code="VALIDATION_ERROR")
+        super().__init__(message=message, status_code=422)

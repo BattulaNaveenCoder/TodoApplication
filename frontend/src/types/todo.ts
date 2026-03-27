@@ -17,3 +17,8 @@ export interface TodoUpdate {
   description?: string | null;
   is_completed?: boolean;
 }
+
+export interface TodoListResponse {
+  todos: Todo[];
+  count: number;
+}

@@ -13,6 +13,11 @@ interface UseTodosReturn {
   refresh: () => Promise<void>;
 }
 
+function extractErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return 'An unexpected error occurred';
+}
+
 export function useTodos(): UseTodosReturn {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,9 +28,9 @@ export function useTodos(): UseTodosReturn {
     setError(null);
     try {
       const data = await todosApi.fetchTodos();
-      setTodos(data);
-    } catch {
-      setError('Failed to load todos');
+      setTodos(data.todos);
+    } catch (err) {
+      setError(extractErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -36,21 +41,25 @@ export function useTodos(): UseTodosReturn {
   }, [refresh]);
 
   const addTodo = useCallback(async (data: TodoCreate) => {
+    setError(null);
     const created = await todosApi.createTodo(data);
     setTodos((prev) => [created, ...prev]);
   }, []);
 
   const editTodo = useCallback(async (id: number, data: TodoUpdate) => {
+    setError(null);
     const updated = await todosApi.updateTodo(id, data);
     setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
   }, []);
 
   const removeTodo = useCallback(async (id: number) => {
+    setError(null);
     await todosApi.deleteTodo(id);
     setTodos((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   const toggleComplete = useCallback(async (todo: Todo) => {
+    setError(null);
     const updated = todo.is_completed
       ? await todosApi.uncompleteTodo(todo.id)
       : await todosApi.completeTodo(todo.id);
