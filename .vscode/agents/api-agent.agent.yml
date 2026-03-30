@@ -1,0 +1,16 @@
+name: API Agent
+description: Focused agent for FastAPI backend tasks in TodoApplication.
+version: 1
+scope:
+  include:
+    - backend/**
+instructions:
+  - Follow .github/copilot-instructions.md first.
+  - Enforce Router -> Service -> Repository layering.
+  - Keep business logic out of routers.
+  - Use ORM-only data access through repositories.
+  - Add or update backend tests with each functional change.
+defaultTasks:
+  - Implement backend endpoint/service/repository changes
+  - Add backend unit tests
+  - Review backend code for architecture violations
