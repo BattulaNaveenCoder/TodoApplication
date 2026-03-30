@@ -1,23 +1,26 @@
 # PR Review Prompt
 
-Review the current branch as a pre-merge quality gate.
+Task:
+Review all changes in the current branch against main.
 
-## Review Priorities
-1. Correctness and regressions
-2. Architecture compliance
-3. Security concerns
-4. Test completeness
-5. Maintainability
+Focus Areas:
+1. Architecture boundary violations (Route -> Service -> Repository)
+2. Functional regressions and edge-case bugs
+3. Missing validation and exception mapping
+4. Security and secret-handling issues
+5. Test gaps and brittle assertions
+6. Frontend loading/error handling and typing issues
 
-## Required Checks
-- Router -> Service -> Repository layering is respected.
-- No business logic in routers.
-- No direct DB access in services.
-- Errors are meaningful and structured.
-- New/changed logic includes tests.
+Output Format:
+- BLOCKER: must fix before merge
+- WARNING: should fix in this PR
+- SUGGESTION: optional improvement
 
-## Output Format
-1. Summary verdict: PASS or NEEDS WORK
-2. Findings grouped by severity: CRITICAL, HIGH, MEDIUM, LOW
-3. For each finding: file, line, issue, impact, fix recommendation
-4. Residual risks and missing test coverage
+For each finding include:
+- Severity
+- File path
+- Line reference
+- Risk summary
+- Concrete fix recommendation
+
+End with PASS or NEEDS WORK.

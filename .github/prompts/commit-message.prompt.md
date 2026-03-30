@@ -1,23 +1,16 @@
 # Commit Message Prompt
 
-Generate a commit message from the current staged changes.
+Task:
+Generate conventional commit messages for the currently staged changes.
 
-## Format
-`<type>(<scope>): <description>`
+Rules:
+- Format: <type>(<scope>): <description>
+- Allowed types: feat, fix, test, refactor, docs, chore
+- Keep description concise and specific.
+- Use present tense and lowercase scope.
+- Avoid trailing punctuation.
 
-## Allowed Types
-- feat
-- fix
-- test
-- refactor
-- docs
-- chore
-
-## Rules
-- Use present tense and imperative mood.
-- Keep subject line <= 72 chars.
-- Scope should be one of: api, web, db, tests, docs, build.
-- Add a short body only when needed for context.
-
-## Example
-`fix(api): handle missing todo id with 404 response`
+Output:
+1. Primary commit message.
+2. Two alternatives.
+3. One short body (optional) when change is complex.

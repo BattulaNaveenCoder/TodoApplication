@@ -1,19 +1,11 @@
 name: test-generator
-description: Auto-generate tests aligned to project testing conventions.
-version: 1
+description: Auto-trigger guidance for generating backend and frontend tests.
 triggers:
-  - generate tests
-  - add tests
-  - improve coverage
-inputs:
-  - changed files
-  - target layer
-instructions:
-  - Read target source files before writing tests.
-  - Generate tests for success and failure paths.
-  - Follow naming convention `test_<what>_when_<condition>` for Python tests.
-  - Keep tests independent and deterministic.
-  - Mirror source structure under test directories.
-outputs:
-  - New or updated test files
-  - Coverage gap summary
+  - "#test-generation"
+  - "generate tests"
+  - "write unit tests"
+promptFile: .github/prompts/test-generation.prompt.md
+expectedOutput:
+  - Comprehensive test cases per public function or endpoint
+  - Behavior-focused assertions
+  - Clear handling of success and failure paths

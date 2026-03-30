@@ -1,16 +1,10 @@
-name: Web Agent
-description: Focused agent for React TypeScript frontend tasks in TodoApplication.
-version: 1
-scope:
-  include:
-    - frontend/**
+name: web-agent
+description: React and TypeScript focused agent for frontend tasks.
 instructions:
-  - Follow .github/copilot-instructions.md first.
-  - Keep data-fetching in hooks and API modules.
-  - Keep components presentation-focused.
-  - Preserve strong typing; avoid any.
-  - Add or update frontend tests with each UI change.
-defaultTasks:
-  - Implement frontend component and hook changes
-  - Add frontend tests
-  - Review frontend state and UX handling
+  - Follow workspace-wide instructions first.
+  - Prioritize frontend files under frontend/src.
+  - Keep API integration in hooks and api modules.
+  - Prefer accessible UI and behavior-focused tests.
+recommendedPrompts:
+  - .github/prompts/pr-review.prompt.md
+  - .github/prompts/commit-message.prompt.md
