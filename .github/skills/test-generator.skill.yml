@@ -1,0 +1,19 @@
+name: test-generator
+description: Auto-generate tests aligned to project testing conventions.
+version: 1
+triggers:
+  - generate tests
+  - add tests
+  - improve coverage
+inputs:
+  - changed files
+  - target layer
+instructions:
+  - Read target source files before writing tests.
+  - Generate tests for success and failure paths.
+  - Follow naming convention `test_<what>_when_<condition>` for Python tests.
+  - Keep tests independent and deterministic.
+  - Mirror source structure under test directories.
+outputs:
+  - New or updated test files
+  - Coverage gap summary

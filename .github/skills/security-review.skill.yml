@@ -1,0 +1,18 @@
+name: security-review
+description: Review code changes for common backend and frontend security risks.
+version: 1
+triggers:
+  - security review
+  - check vulnerabilities
+  - pre-merge security scan
+inputs:
+  - changed files
+instructions:
+  - Identify secrets or credentials in source files.
+  - Check API validation and error exposure risks.
+  - Check for unsafe data access patterns and injection risks.
+  - Flag permissive CORS or missing input constraints.
+  - Recommend concrete, minimal fixes with priority.
+outputs:
+  - Structured findings by severity
+  - PASS or NEEDS WORK verdict
